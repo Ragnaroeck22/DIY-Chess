@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_executable(${PROJECT_NAME} main.cpp Board/Board.cpp Board/Board.h Board/Tile.cpp Board/Tile.h Pieces/Piece.cpp Pieces/Piece.h Functions/BasicFunctions.cpp Functions/BasicFunctions.h Pieces/Pawn.cpp Pieces/Pawn.h Structs.h Pieces/Knight.cpp Pieces/Knight.h Pieces/Bishop.cpp Pieces/Bishop.h)
+add_executable(${PROJECT_NAME} main.cpp Board/Board.cpp Board/Board.h Board/Tile.cpp Board/Tile.h Pieces/Piece.cpp Pieces/Piece.h Functions/BasicFunctions.cpp Functions/BasicFunctions.h Pieces/Pawn.cpp Pieces/Pawn.h Structs.h Pieces/Knight.cpp Pieces/Knight.h Pieces/Bishop.cpp Pieces/Bishop.h Pieces/Rook.cpp Pieces/Rook.h)
 
 # Add config.h.in file
 configure_file(config.h.in config.h)
