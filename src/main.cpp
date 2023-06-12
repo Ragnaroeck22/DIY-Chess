@@ -3,6 +3,7 @@
 #include "raylib.h"
 
 #include "config.h"
+#include "Board/Board.h"
 
 int main() {
     // Raylib initialization
@@ -14,33 +15,35 @@ int main() {
     ToggleFullscreen();
 #endif
 
-    // Your own initialization code here
-    // ...
-    // ...
-    Texture2D myTexture = LoadTexture("assets/graphics/testimage.png");
+
+    // ============== INIT ===============
+
+    Board board;
+
+
 
     // Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
-        // Updates that are made by frame are coded here
-        // ...
-        // ...
+        // =============== UPDATE =================
+
+        board.Update();
+
+
+
+        // =================== DRAW ====================
 
         BeginDrawing();
-            // You can draw on the screen between BeginDrawing() and EndDrawing()
-            // ...
-            // ...
-            ClearBackground(WHITE);
-            DrawText("Hello, world!", 10, 10, 30, LIGHTGRAY);
-            DrawTexture(myTexture, 10, 100, WHITE);
+            ClearBackground(GRAY);
+
+
+        board.Draw();
+
 
         EndDrawing();
     } // Main game loop end
 
-    // De-initialization here
-    // ...
-    // ...
-    UnloadTexture(myTexture);
+    // ============== DE-INIT ========================
 
     // Close window and OpenGL context
     CloseWindow();
