@@ -12,6 +12,7 @@ class Piece
 public:
 
     int x, y;
+    bool isBeingDragged = false;
 
     virtual void Draw(Vector2 position, int tileSize) = 0;
 

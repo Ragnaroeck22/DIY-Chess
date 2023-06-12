@@ -13,6 +13,7 @@ Board::Board()
 
     // Tests
     pieces.push_back(std::make_shared<Pawn>(4, 3));
+    tiles[4][3]->contents = pieces[0];
 }
 
 void Board::GenerateBoard()
@@ -67,6 +68,11 @@ void Board::Update()
     {
         Vector2 tilePos = GetTileFromPosition(GetMousePosition())->coordinates;
         std::cout << "Click at " + std::to_string((int)tilePos.x) + " | " + std::to_string((int)tilePos.y) << std::endl;
+        BeginDrag();
+    }
+    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+    {
+        EndDrag();
     }
 
 
@@ -91,13 +97,22 @@ void Board::Draw()
     // Draw pieces
     for (int i = 0; i < pieces.size(); i++)
     {
-        //Vector2 drawPos = {static_cast<float>(startPos.x  * pieces[i]->x + tileSize / 2), static_cast<float>(startPos.y  * pieces[i]->y + tileSize / 2)};
-        float drawX = startPos.x + pieces[i]->x * tileSize - tileSize / 2;
-        float drawY = startPos.y + pieces[i]->y * tileSize - tileSize / 2;
+        if (pieces[i]->isBeingDragged)
+        {
+            pieces[i]->Draw(GetMousePosition(), tileSize);
+        }
 
-        Vector2 drawPos = {drawX, drawY};
+        else
+        {
+            //Vector2 drawPos = {static_cast<float>(startPos.x  * pieces[i]->x + tileSize / 2), static_cast<float>(startPos.y  * pieces[i]->y + tileSize / 2)};
+            float drawX = startPos.x + pieces[i]->x * tileSize + tileSize / 2;
+            float drawY = startPos.y + pieces[i]->y * tileSize + tileSize / 2;
 
-        pieces[i]->Draw(drawPos, tileSize);
+            Vector2 drawPos = {drawX, drawY};
+
+            pieces[i]->Draw(drawPos, tileSize);
+        }
+
     }
 
 }
@@ -107,5 +122,43 @@ std::shared_ptr<Tile> Board::GetTileFromPosition(Vector2 screenPosition)
     int coordX = startPos.x + screenPosition.x / tileSize;
     int coordY = startPos.y + screenPosition.y / tileSize;
 
-    return tiles[coordX][coordY];
+    if (coordX < boardSize && coordX >= 0 && coordY < boardSize && coordY >= 0)
+        return tiles[coordX][coordY];
+    else
+        return nullptr;
+}
+
+
+void Board::BeginDrag()
+{
+    draggedPiece = GetTileFromPosition(GetMousePosition())->contents;
+
+    if (draggedPiece == nullptr)
+        return;
+
+    draggedPiece->isBeingDragged = true;
+}
+
+void Board::EndDrag()
+{
+
+    if (draggedPiece == nullptr)
+        return;
+
+    std::shared_ptr<Tile> newTile = GetTileFromPosition(GetMousePosition());
+    if (newTile == nullptr)
+    {
+        draggedPiece->isBeingDragged = false;
+        return;
+    }
+
+
+
+    // Maybe check if the tile isn't empty
+    newTile->contents = draggedPiece;
+    tiles[draggedPiece->x][draggedPiece->y]->contents = nullptr;
+    draggedPiece->x = newTile->coordinates.x;
+    draggedPiece->y = newTile->coordinates.y;
+    draggedPiece->isBeingDragged = false;
+    draggedPiece = nullptr;
 }

@@ -24,6 +24,9 @@ private:
 
     std::vector<std::shared_ptr<Piece>> pieces;
 
+    // Dragging
+    std::shared_ptr<Piece> draggedPiece;
+
 
 public:
 
@@ -44,5 +47,9 @@ private:
     std::shared_ptr<Tile> GetTileFromPosition(Vector2 screenPosition);
 
 
+    // Dragging
+    void BeginDrag();
+    void WhileDragging();
+    void EndDrag();
 };
 
