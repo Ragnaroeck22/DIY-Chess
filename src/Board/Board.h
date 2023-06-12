@@ -46,10 +46,11 @@ private:
 
     std::shared_ptr<Tile> GetTileFromPosition(Vector2 screenPosition);
 
+    void SelectPiece();
+    void DeselectPiece();
 
     // Dragging
     void BeginDrag();
-    void WhileDragging();
     void EndDrag();
 };
 

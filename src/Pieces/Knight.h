@@ -4,17 +4,12 @@
 
 #pragma once
 
-#include "raylib.h"
 #include "Piece.h"
 
-class Pawn : public Piece
+class Knight : public Piece
 {
-
 public:
-    bool isFirstAction = true;
-
-    Pawn(int posX, int posY, bool ownedByPlayer);
+    Knight(int posX, int posY, bool ownedByPlayer);
     void Draw(Vector2 position, int tileSize) override;
     std::vector<Vector2Int> GetMovementOptions() override;
 };
-

@@ -4,6 +4,7 @@
 
 #include "Board.h"
 #include "../Pieces/Pawn.h"
+#include "../Pieces/Knight.h"
 
 #include <iostream>
 
@@ -12,7 +13,7 @@ Board::Board()
     GenerateBoard();
 
     // Tests
-    pieces.push_back(std::make_shared<Pawn>(4, 3));
+    pieces.push_back(std::make_shared<Knight>(4, 3, true));
     tiles[4][3]->contents = pieces[0];
 }
 
@@ -39,7 +40,7 @@ void Board::GenerateBoard()
                 currentColor = BLACK;
             }
 
-            Vector2 coords = {static_cast<float>(y), static_cast<float>(x)};
+            Vector2Int coords = {y, x};
             helperVec.push_back(std::make_shared<Tile>(coords, currentColor));
 
 
@@ -66,8 +67,6 @@ void Board::Update()
 {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
     {
-        Vector2 tilePos = GetTileFromPosition(GetMousePosition())->coordinates;
-        std::cout << "Click at " + std::to_string((int)tilePos.x) + " | " + std::to_string((int)tilePos.y) << std::endl;
         BeginDrag();
     }
     if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
@@ -89,6 +88,14 @@ void Board::Draw()
             DrawRectangle(startPos.x + j * tileSize,
                           startPos.y + i * tileSize,
                           tileSize, tileSize, tiles[i][j]->color);
+
+
+            if (tiles[j][i]->shouldHighlight)
+            {
+                DrawRectangle(startPos.x + j * tileSize,
+                              startPos.y + i * tileSize,
+                              tileSize, tileSize, ColorAlpha(YELLOW, 0.5));
+            }
 
         }
 
@@ -137,28 +144,82 @@ void Board::BeginDrag()
         return;
 
     draggedPiece->isBeingDragged = true;
+    SelectPiece();
 }
 
 void Board::EndDrag()
 {
-
     if (draggedPiece == nullptr)
+    {
+        DeselectPiece();
         return;
+    }
 
     std::shared_ptr<Tile> newTile = GetTileFromPosition(GetMousePosition());
     if (newTile == nullptr)
     {
         draggedPiece->isBeingDragged = false;
+        DeselectPiece();
         return;
     }
 
 
+    if (newTile->coordinates.x == draggedPiece->x && newTile->coordinates.y == draggedPiece->y ||
+        !newTile->shouldHighlight)
+    {
+        draggedPiece->isBeingDragged = false;
+        DeselectPiece();
+        return;
+    }
+
+    DeselectPiece();
 
     // Maybe check if the tile isn't empty
     newTile->contents = draggedPiece;
     tiles[draggedPiece->x][draggedPiece->y]->contents = nullptr;
     draggedPiece->x = newTile->coordinates.x;
     draggedPiece->y = newTile->coordinates.y;
+
+    std::cout << "New coords: " + std::to_string(draggedPiece->x) + " | " + std::to_string(draggedPiece->y) << std::endl;
+
     draggedPiece->isBeingDragged = false;
     draggedPiece = nullptr;
+}
+
+void Board::SelectPiece()
+{
+    if (draggedPiece == nullptr)
+        return;
+
+    std::shared_ptr<Tile> originTile = GetTileFromPosition({static_cast<float>(draggedPiece->x), static_cast<float>(draggedPiece->y)});
+
+    if (originTile == nullptr)
+        return;
+
+    std::vector<Vector2Int> movementOptions = draggedPiece->GetMovementOptions();
+    for (int i = 0; i < movementOptions.size(); i++)
+    {
+        int indexX = draggedPiece->x + movementOptions[i].x;
+        int indexY = draggedPiece->y + movementOptions[i].y;
+
+        if (indexX >= 0 && indexX < boardSize &&
+            indexY >= 0 && indexY < boardSize)
+        {
+
+            tiles[indexX][indexY]->shouldHighlight = true;
+
+
+        }
+    }
+}
+
+void Board::DeselectPiece()
+{
+    for (int i = 0; i < boardSize; i++)
+    {
+        for (int j = 0; j < boardSize; j++)
+        {
+            tiles[i][j]->shouldHighlight = false;
+        }
+    }
 }

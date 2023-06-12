@@ -14,10 +14,11 @@ public:
 
     std::shared_ptr<Piece> contents = nullptr;
     Color color;
+    bool shouldHighlight = false;
 
-    Vector2 coordinates;
+    Vector2Int coordinates;
 
-    Tile(Vector2 coordinates, Color color);
+    Tile(Vector2Int coordinates, Color color);
 
 };
 

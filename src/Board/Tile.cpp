@@ -4,7 +4,7 @@
 
 #include "Tile.h"
 
-Tile::Tile(Vector2 coordinates, Color color)
+Tile::Tile(Vector2Int coordinates, Color color)
 {
     this->coordinates = coordinates;
     this->color = color;
