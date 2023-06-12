@@ -8,6 +8,7 @@
 #include "../Pieces/Bishop.h"
 #include "../Pieces/Rook.h"
 #include "../Pieces/Queen.h"
+#include "../Pieces/King.h"
 
 #include <iostream>
 
@@ -16,7 +17,7 @@ Board::Board()
     GenerateBoard();
 
     // Tests
-    pieces.push_back(std::make_shared<Queen>(4, 3, true));
+    pieces.push_back(std::make_shared<King>(4, 3, true));
     tiles[4][3]->contents = pieces[0];
 }
 
