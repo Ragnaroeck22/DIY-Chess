@@ -17,8 +17,10 @@ Board::Board()
     GenerateBoard();
 
     // Tests
-    pieces.push_back(std::make_shared<King>(4, 3, true));
+    pieces.push_back(std::make_shared<Queen>(4, 3, true));
+    pieces.push_back(std::make_shared<Rook>(7, 4, true));
     tiles[4][3]->contents = pieces[0];
+    tiles[7][4]->contents = pieces[1];
 }
 
 void Board::GenerateBoard()
@@ -210,9 +212,76 @@ void Board::SelectPiece()
             indexY >= 0 && indexY < boardSize)
         {
 
+
+
+
             tiles[indexX][indexY]->shouldHighlight = true;
 
 
+        }
+    }
+
+    Vector2Int upperLimit = {10, 10};
+    Vector2Int lowerLimit = {-10, -10};
+
+    for (int i = 0; i < pieces.size(); i++)
+    {
+        std::shared_ptr<Tile> tileToCheck = tiles[pieces[i]->x][pieces[i]->y];
+
+        if (pieces[i] != draggedPiece)
+        {
+
+            if (tileToCheck->shouldHighlight)
+            {
+                TraceLog(LOG_INFO, "DA");
+
+                std::cout << "Piece: " + std::to_string(pieces[i]->x) + " | " + std::to_string(pieces[i]->y)
+                          << std::endl;
+                std::cout << "Tile: " + std::to_string(tileToCheck->coordinates.x) + " | " +
+                             std::to_string(tileToCheck->coordinates.y) << std::endl;
+
+
+                if (draggedPiece->x < tileToCheck->coordinates.x && tileToCheck->coordinates.x < upperLimit.x)
+                {
+                    upperLimit.x = tileToCheck->coordinates.x;
+                    std::cout << "Upper X set to " + std::to_string(upperLimit.x) << std::endl;
+                }
+                if (draggedPiece->x > tileToCheck->coordinates.x && tileToCheck->coordinates.x > lowerLimit.x)
+                {
+                    lowerLimit.x = tileToCheck->coordinates.x;
+                }
+
+                if (draggedPiece->y < tileToCheck->coordinates.y && tileToCheck->coordinates.y < upperLimit.y)
+                {
+                    upperLimit.y = tileToCheck->coordinates.y;
+                }
+                if (draggedPiece->y > tileToCheck->coordinates.y && tileToCheck->coordinates.y > lowerLimit.y)
+                {
+                    lowerLimit.y = tileToCheck->coordinates.y;
+                }
+
+
+                for (int i = 0; i < movementOptions.size(); i++)
+                {
+                    int indexX = draggedPiece->x + movementOptions[i].x;
+                    int indexY = draggedPiece->y + movementOptions[i].y;
+
+                    if (indexX >= 0 && indexX < boardSize &&
+                        indexY >= 0 && indexY < boardSize)
+                    {
+                        tileToCheck = tiles[indexX][indexY];
+
+                        if ((tileToCheck->coordinates.x >= upperLimit.x && tileToCheck->coordinates.y == draggedPiece->y) ||
+                            (tileToCheck->coordinates.x <= lowerLimit.x && tileToCheck->coordinates.y == draggedPiece->y) ||
+                            (tileToCheck->coordinates.y <= lowerLimit.y && tileToCheck->coordinates.x == draggedPiece->x) ||
+                            (tileToCheck->coordinates.y >= upperLimit.y && tileToCheck->coordinates.x == draggedPiece->x))
+                        {
+                            TraceLog(LOG_INFO, "YEAAA");
+                            tileToCheck->shouldHighlight = false;
+                        }
+                    }
+                }
+            }
         }
     }
 }
