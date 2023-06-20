@@ -255,78 +255,81 @@ void Board::HighlightTiles()
     {
         std::shared_ptr<Tile> tileToCheck = tiles[pieces[i]->x][pieces[i]->y];
 
-        if (pieces[i] != draggedPiece)
+        if (pieces[i] == draggedPiece)
+            break;
+
+        if (tileToCheck->highlightType != HIGHLIGHT)
+            break;
+
+        std::cout << "Piece: " + std::to_string(pieces[i]->x) + " | " + std::to_string(pieces[i]->y)
+                  << std::endl;
+        std::cout << "Tile: " + std::to_string(tileToCheck->coordinates.x) + " | " +
+                     std::to_string(tileToCheck->coordinates.y) << std::endl;
+
+
+        if (draggedPiece->x < tileToCheck->coordinates.x && tileToCheck->coordinates.x < upperLimit.x)
         {
+            upperLimit.x = tileToCheck->coordinates.x;
 
-            if (tileToCheck->highlightType == HIGHLIGHT)
+            if (!tileToCheck->contents->isOwnedByPlayer)
             {
+                upperLimit.x++;
+            }
+        }
+        if (draggedPiece->x > tileToCheck->coordinates.x && tileToCheck->coordinates.x > lowerLimit.x)
+        {
+            lowerLimit.x = tileToCheck->coordinates.x;
 
-                std::cout << "Piece: " + std::to_string(pieces[i]->x) + " | " + std::to_string(pieces[i]->y)
-                          << std::endl;
-                std::cout << "Tile: " + std::to_string(tileToCheck->coordinates.x) + " | " +
-                             std::to_string(tileToCheck->coordinates.y) << std::endl;
+            if (!tileToCheck->contents->isOwnedByPlayer)
+            {
+                lowerLimit.x--;
+            }
+        }
+
+        if (draggedPiece->y < tileToCheck->coordinates.y && tileToCheck->coordinates.y < upperLimit.y)
+        {
+            upperLimit.y = tileToCheck->coordinates.y;
+
+            if (!tileToCheck->contents->isOwnedByPlayer)
+            {
+                upperLimit.y++;
+            }
+        }
+        if (draggedPiece->y > tileToCheck->coordinates.y && tileToCheck->coordinates.y > lowerLimit.y)
+        {
+            lowerLimit.y = tileToCheck->coordinates.y;
+
+            if (!tileToCheck->contents->isOwnedByPlayer)
+            {
+                lowerLimit.y--;
+            }
+        }
 
 
-                if (draggedPiece->x < tileToCheck->coordinates.x && tileToCheck->coordinates.x < upperLimit.x)
+        for (int i = 0; i < movementOptions.size(); i++)
+        {
+            int indexX = draggedPiece->x + movementOptions[i].x;
+            int indexY = draggedPiece->y + movementOptions[i].y;
+
+            if (indexX >= 0 && indexX < boardSize &&
+                indexY >= 0 && indexY < boardSize)
+            {
+                tileToCheck = tiles[indexX][indexY];
+
+                if ((tileToCheck->coordinates.x >= upperLimit.x &&
+                     tileToCheck->coordinates.y == draggedPiece->y) ||
+                    (tileToCheck->coordinates.x <= lowerLimit.x &&
+                     tileToCheck->coordinates.y == draggedPiece->y) ||
+                    (tileToCheck->coordinates.y <= lowerLimit.y &&
+                     tileToCheck->coordinates.x == draggedPiece->x) ||
+                    (tileToCheck->coordinates.y >= upperLimit.y &&
+                     tileToCheck->coordinates.x == draggedPiece->x))
                 {
-                    upperLimit.x = tileToCheck->coordinates.x;
-
-                    if (!tileToCheck->contents->isOwnedByPlayer)
-                    {
-                        upperLimit.x++;
-                    }
-                }
-                if (draggedPiece->x > tileToCheck->coordinates.x && tileToCheck->coordinates.x > lowerLimit.x)
-                {
-                    lowerLimit.x = tileToCheck->coordinates.x;
-
-                    if (!tileToCheck->contents->isOwnedByPlayer)
-                    {
-                        lowerLimit.x--;
-                    }
-                }
-
-                if (draggedPiece->y < tileToCheck->coordinates.y && tileToCheck->coordinates.y < upperLimit.y)
-                {
-                    upperLimit.y = tileToCheck->coordinates.y;
-
-                    if (!tileToCheck->contents->isOwnedByPlayer)
-                    {
-                        upperLimit.y++;
-                    }
-                }
-                if (draggedPiece->y > tileToCheck->coordinates.y && tileToCheck->coordinates.y > lowerLimit.y)
-                {
-                    lowerLimit.y = tileToCheck->coordinates.y;
-
-                    if (!tileToCheck->contents->isOwnedByPlayer)
-                    {
-                        lowerLimit.y--;
-                    }
-                }
-
-
-                for (int i = 0; i < movementOptions.size(); i++)
-                {
-                    int indexX = draggedPiece->x + movementOptions[i].x;
-                    int indexY = draggedPiece->y + movementOptions[i].y;
-
-                    if (indexX >= 0 && indexX < boardSize &&
-                        indexY >= 0 && indexY < boardSize)
-                    {
-                        tileToCheck = tiles[indexX][indexY];
-
-                        if ((tileToCheck->coordinates.x >= upperLimit.x && tileToCheck->coordinates.y == draggedPiece->y) ||
-                            (tileToCheck->coordinates.x <= lowerLimit.x && tileToCheck->coordinates.y == draggedPiece->y) ||
-                            (tileToCheck->coordinates.y <= lowerLimit.y && tileToCheck->coordinates.x == draggedPiece->x) ||
-                            (tileToCheck->coordinates.y >= upperLimit.y && tileToCheck->coordinates.x == draggedPiece->x))
-                        {
-                            tileToCheck->highlightType = NONE;
-                        }
-                    }
+                    tileToCheck->highlightType = NONE;
                 }
             }
         }
+
     }
 
     HighlightCapture();
