@@ -20,8 +20,5 @@ public:
     virtual void Draw(Vector2 position, int tileSize) = 0;
     virtual std::vector<Vector2Int> GetMovementOptions() = 0;
 
-
-
-
 };
 

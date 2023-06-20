@@ -18,9 +18,11 @@ Board::Board()
 
     // Tests
     pieces.push_back(std::make_shared<Queen>(4, 3, true));
-    pieces.push_back(std::make_shared<Rook>(7, 4, true));
+    pieces.push_back(std::make_shared<Rook>(7, 4, false));
+    pieces.push_back(std::make_shared<Knight>(6, 3, true));
     tiles[4][3]->contents = pieces[0];
     tiles[7][4]->contents = pieces[1];
+    tiles[6][3]->contents = pieces[2];
 }
 
 void Board::GenerateBoard()
@@ -30,8 +32,6 @@ void Board::GenerateBoard()
 
     for (int y = 0; y < boardSize; y++)
     {
-
-
         std::vector<std::shared_ptr<Tile>> helperVec;
         for (int x = 0; x < boardSize; x++)
         {
@@ -48,10 +48,6 @@ void Board::GenerateBoard()
 
             Vector2Int coords = {y, x};
             helperVec.push_back(std::make_shared<Tile>(coords, currentColor));
-
-
-
-
 
         }
 
@@ -96,11 +92,17 @@ void Board::Draw()
                           tileSize, tileSize, tiles[i][j]->color);
 
 
-            if (tiles[j][i]->shouldHighlight)
+            if (tiles[j][i]->highlightType == HIGHLIGHT)
             {
                 DrawRectangle(startPos.x + j * tileSize,
                               startPos.y + i * tileSize,
                               tileSize, tileSize, ColorAlpha(YELLOW, 0.5));
+            }
+            else if (tiles[j][i]->highlightType == CAPTURE)
+            {
+                DrawRectangle(startPos.x + j * tileSize,
+                              startPos.y + i * tileSize,
+                              tileSize, tileSize, ColorAlpha(RED, 0.5));
             }
 
         }
@@ -149,6 +151,9 @@ void Board::BeginDrag()
     if (draggedPiece == nullptr)
         return;
 
+    // Do a check if piece is controlled by the correct player
+
+
     draggedPiece->isBeingDragged = true;
     SelectPiece();
 }
@@ -171,7 +176,7 @@ void Board::EndDrag()
 
 
     if (newTile->coordinates.x == draggedPiece->x && newTile->coordinates.y == draggedPiece->y ||
-        !newTile->shouldHighlight)
+        newTile->highlightType == NONE)
     {
         draggedPiece->isBeingDragged = false;
         DeselectPiece();
@@ -180,11 +185,23 @@ void Board::EndDrag()
 
     DeselectPiece();
 
-    // Maybe check if the tile isn't empty
-    newTile->contents = draggedPiece;
     tiles[draggedPiece->x][draggedPiece->y]->contents = nullptr;
     draggedPiece->x = newTile->coordinates.x;
     draggedPiece->y = newTile->coordinates.y;
+
+    if (newTile->highlightType == CAPTURE && newTile->contents != nullptr)
+    {
+        // Here is the last opportunity to do something with the captured piece
+        for (int i = 0; i < pieces.size(); i++)
+        {
+            if (pieces[i] == newTile->contents)
+            {
+                pieces.erase(pieces.cbegin() + i);
+            }
+        }
+    }
+
+    newTile->contents = draggedPiece;
 
     std::cout << "New coords: " + std::to_string(draggedPiece->x) + " | " + std::to_string(draggedPiece->y) << std::endl;
 
@@ -202,6 +219,22 @@ void Board::SelectPiece()
     if (originTile == nullptr)
         return;
 
+    HighlightTiles();
+}
+
+void Board::DeselectPiece()
+{
+    for (int i = 0; i < boardSize; i++)
+    {
+        for (int j = 0; j < boardSize; j++)
+        {
+            tiles[i][j]->highlightType = NONE;
+        }
+    }
+}
+
+void Board::HighlightTiles()
+{
     std::vector<Vector2Int> movementOptions = draggedPiece->GetMovementOptions();
     for (int i = 0; i < movementOptions.size(); i++)
     {
@@ -211,13 +244,7 @@ void Board::SelectPiece()
         if (indexX >= 0 && indexX < boardSize &&
             indexY >= 0 && indexY < boardSize)
         {
-
-
-
-
-            tiles[indexX][indexY]->shouldHighlight = true;
-
-
+            tiles[indexX][indexY]->highlightType = HIGHLIGHT;
         }
     }
 
@@ -231,9 +258,8 @@ void Board::SelectPiece()
         if (pieces[i] != draggedPiece)
         {
 
-            if (tileToCheck->shouldHighlight)
+            if (tileToCheck->highlightType == HIGHLIGHT)
             {
-                TraceLog(LOG_INFO, "DA");
 
                 std::cout << "Piece: " + std::to_string(pieces[i]->x) + " | " + std::to_string(pieces[i]->y)
                           << std::endl;
@@ -244,20 +270,39 @@ void Board::SelectPiece()
                 if (draggedPiece->x < tileToCheck->coordinates.x && tileToCheck->coordinates.x < upperLimit.x)
                 {
                     upperLimit.x = tileToCheck->coordinates.x;
-                    std::cout << "Upper X set to " + std::to_string(upperLimit.x) << std::endl;
+
+                    if (!tileToCheck->contents->isOwnedByPlayer)
+                    {
+                        upperLimit.x++;
+                    }
                 }
                 if (draggedPiece->x > tileToCheck->coordinates.x && tileToCheck->coordinates.x > lowerLimit.x)
                 {
                     lowerLimit.x = tileToCheck->coordinates.x;
+
+                    if (!tileToCheck->contents->isOwnedByPlayer)
+                    {
+                        lowerLimit.x--;
+                    }
                 }
 
                 if (draggedPiece->y < tileToCheck->coordinates.y && tileToCheck->coordinates.y < upperLimit.y)
                 {
                     upperLimit.y = tileToCheck->coordinates.y;
+
+                    if (!tileToCheck->contents->isOwnedByPlayer)
+                    {
+                        upperLimit.y++;
+                    }
                 }
                 if (draggedPiece->y > tileToCheck->coordinates.y && tileToCheck->coordinates.y > lowerLimit.y)
                 {
                     lowerLimit.y = tileToCheck->coordinates.y;
+
+                    if (!tileToCheck->contents->isOwnedByPlayer)
+                    {
+                        lowerLimit.y--;
+                    }
                 }
 
 
@@ -276,23 +321,26 @@ void Board::SelectPiece()
                             (tileToCheck->coordinates.y <= lowerLimit.y && tileToCheck->coordinates.x == draggedPiece->x) ||
                             (tileToCheck->coordinates.y >= upperLimit.y && tileToCheck->coordinates.x == draggedPiece->x))
                         {
-                            TraceLog(LOG_INFO, "YEAAA");
-                            tileToCheck->shouldHighlight = false;
+                            tileToCheck->highlightType = NONE;
                         }
                     }
                 }
             }
         }
     }
+
+    HighlightCapture();
+
 }
 
-void Board::DeselectPiece()
+void Board::HighlightCapture()
 {
-    for (int i = 0; i < boardSize; i++)
+    for (int i = 0; i < pieces.size(); i++)
     {
-        for (int j = 0; j < boardSize; j++)
+        if (tiles[pieces[i]->x][pieces[i]->y]->highlightType == HIGHLIGHT &&
+            !pieces[i]->isOwnedByPlayer)
         {
-            tiles[i][j]->shouldHighlight = false;
+            tiles[pieces[i]->x][pieces[i]->y]->highlightType = CAPTURE;
         }
     }
 }

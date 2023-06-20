@@ -49,6 +49,9 @@ private:
     void SelectPiece();
     void DeselectPiece();
 
+    void HighlightTiles();
+    void HighlightCapture();
+
     // Dragging
     void BeginDrag();
     void EndDrag();

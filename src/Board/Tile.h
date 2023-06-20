@@ -6,6 +6,7 @@
 
 #include <memory>
 #include "raylib.h"
+#include "../Enums.h"
 #include "../Pieces/Piece.h"
 
 class Tile
@@ -14,7 +15,7 @@ public:
 
     std::shared_ptr<Piece> contents = nullptr;
     Color color;
-    bool shouldHighlight = false;
+    HighlightType highlightType = NONE;
 
     Vector2Int coordinates;
 
