@@ -160,6 +160,7 @@ void Board::BeginDrag()
 
 void Board::EndDrag()
 {
+
     if (draggedPiece == nullptr)
     {
         DeselectPiece();
@@ -183,13 +184,12 @@ void Board::EndDrag()
         return;
     }
 
-    DeselectPiece();
-
     tiles[draggedPiece->x][draggedPiece->y]->contents = nullptr;
     draggedPiece->x = newTile->coordinates.x;
     draggedPiece->y = newTile->coordinates.y;
 
-    if (newTile->highlightType == CAPTURE && newTile->contents != nullptr)
+
+    if (newTile->highlightType == CAPTURE)
     {
         // Here is the last opportunity to do something with the captured piece
         for (int i = 0; i < pieces.size(); i++)
@@ -207,6 +207,8 @@ void Board::EndDrag()
 
     draggedPiece->isBeingDragged = false;
     draggedPiece = nullptr;
+    DeselectPiece();
+
 }
 
 void Board::SelectPiece()
@@ -305,7 +307,6 @@ void Board::HighlightTiles()
             }
         }
 
-
         for (int i = 0; i < movementOptions.size(); i++)
         {
             int indexX = draggedPiece->x + movementOptions[i].x;
@@ -316,6 +317,7 @@ void Board::HighlightTiles()
             {
                 tileToCheck = tiles[indexX][indexY];
 
+                // Movement occlusion (currently cardinal only)
                 if ((tileToCheck->coordinates.x >= upperLimit.x &&
                      tileToCheck->coordinates.y == draggedPiece->y) ||
                     (tileToCheck->coordinates.x <= lowerLimit.x &&

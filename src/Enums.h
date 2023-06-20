@@ -6,7 +6,7 @@
 
 enum HighlightType
 {
-    NONE,
+    NONE = 0,
     HIGHLIGHT,
     CAPTURE
 };
